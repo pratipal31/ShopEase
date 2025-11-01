@@ -29,13 +29,17 @@ const Banner: React.FC = () => {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <button className="w-full sm:w-auto px-10 py-4 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 transition-all duration-300 text-lg shadow-lg hover:shadow-xl hover:scale-105 transform">
-                Sign Up Now
-              </button>
+              <a href="/login" className="w-full sm:w-auto">
+                <button className="w-full sm:w-auto px-10 py-4 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 transition-all duration-300 text-lg shadow-lg hover:shadow-xl hover:scale-105 transform">
+                  Sign Up / Sign In
+                </button>
+              </a>
 
-              <button className="w-full sm:w-auto px-10 py-4 bg-transparent text-white border-2 border-white rounded-lg font-semibold hover:bg-white hover:text-gray-900 transition-all duration-300 text-lg hover:scale-105 transform">
-                Login
-              </button>
+              <a href="#products" className="w-full sm:w-auto">
+                <button className="w-full sm:w-auto px-10 py-4 bg-transparent text-white border-2 border-white rounded-lg font-semibold hover:bg-white hover:text-gray-900 transition-all duration-300 text-lg hover:scale-105 transform">
+                  Browse Featured
+                </button>
+              </a>
             </div>
 
             {/* Features */}

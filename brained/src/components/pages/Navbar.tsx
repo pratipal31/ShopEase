@@ -1,5 +1,7 @@
+import React from "react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { useAuth } from '../../context/AuthContext';
 import { Menu, X, ShoppingBag } from "lucide-react";
 
 const Navbar: React.FC = () => {
@@ -16,42 +18,60 @@ const Navbar: React.FC = () => {
     { href: "/about", label: "About Us" },
   ];
 
+  let auth: any = null;
+  try { auth = useAuth(); } catch (e) { auth = null; }
+
   return (
-    <nav className="fixed top-2 sm:top-4 left-1/2 transform -translate-x-1/2 bg-white shadow-lg z-50 rounded-full w-[95%] sm:w-[90%] max-w-6xl">
+    <nav className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-white/80 backdrop-blur-md border border-gray-100 z-50 rounded-2xl w-[95%] sm:w-[90%] max-w-6xl">
       <div className="px-4 sm:px-8">
-        <div className="flex items-center justify-between h-14 sm:h-16">
+        <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <Link to="/" className="flex items-center space-x-2">
-              <ShoppingBag className="h-5 w-5 sm:h-6 sm:w-6 text-orange-500" />
-              <span className="text-lg sm:text-xl font-bold text-gray-900">
+            <Link to="/" className="flex items-center space-x-3">
+              <div className="w-9 h-9 bg-gradient-to-br from-orange-400 to-pink-500 rounded-md flex items-center justify-center shadow">
+                <ShoppingBag className="h-5 w-5 text-white" />
+              </div>
+              <span className="text-lg sm:text-xl font-bold text-gray-900 tracking-tight">
                 ShopEase
               </span>
             </Link>
           </div>
 
           {/* Desktop Menu */}
-          <div className="hidden lg:block">
-            <div className="flex items-center space-x-1">
+          <div className="hidden lg:flex lg:items-center lg:space-x-4">
               {links.map((link) => (
                 <Link
                   key={link.href}
                   to={link.href}
-                  className={`text-gray-800 hover:text-orange-500 px-4 py-2 text-sm font-medium transition rounded-full ${activeLink === link.href
-                      ? "font-bold text-orange-500 bg-orange-50"
+                  className={`text-gray-700 hover:text-orange-500 px-3 py-2 text-sm font-medium transition rounded-md ${activeLink === link.href
+                      ? "font-semibold text-orange-500 bg-orange-50"
                       : ""
                     }`}
                 >
                   {link.label}
                 </Link>
               ))}
-              <Link to="/login" className="ml-2">
-                <button className="text-black bg-orange-500 hover:bg-orange-600 px-6 py-2 rounded-full text-sm font-medium transition">
-                  Login
-                </button>
-              </Link>
+              <div className="flex items-center gap-3">
+                {auth && auth.user ? (
+                  <>
+                    {auth.user.role === 'admin' && (
+                      <Link to="/admin/products">
+                        <button className="text-sm bg-white border border-gray-200 px-3 py-2 rounded-md text-gray-800 hover:shadow">Admin</button>
+                      </Link>
+                    )}
+                    <Link to="/profile" className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-full bg-orange-500 text-white flex items-center justify-center text-sm font-semibold">{(auth.user.name || auth.user.email || 'U').charAt(0).toUpperCase()}</div>
+                      <span className="text-sm font-medium text-gray-800">{auth.user.name || auth.user.email}</span>
+                    </Link>
+                    <button onClick={async () => { await auth.logout(); }} className="text-sm text-gray-700 bg-gray-100 px-3 py-2 rounded-md hover:bg-gray-200">Logout</button>
+                  </>
+                ) : (
+                  <Link to="/login">
+                    <button className="text-sm bg-gradient-to-r from-orange-400 to-pink-500 text-white px-4 py-2 rounded-md shadow">Sign in</button>
+                  </Link>
+                )}
+              </div>
             </div>
-          </div>
 
           {/* Mobile Menu Toggle */}
           <div className="lg:hidden">

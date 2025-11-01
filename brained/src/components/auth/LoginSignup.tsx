@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import { Eye, EyeOff, ArrowLeft, Sparkles, Shield, Zap, Check, BarChart3, TrendingUp, Users } from 'lucide-react';
 
 // Main App Component with routing logic
@@ -36,7 +38,10 @@ const SignupPage: React.FC<SignupPageProps> = ({ onNavigateToLogin }) => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-    // TODO: Connect to backend - POST /api/auth/signup
+    const navigate = useNavigate();
+    const auth = useAuth();
+
+    // Connect to backend - POST /api/auth/register
     const handleSignup = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -84,8 +89,21 @@ const SignupPage: React.FC<SignupPageProps> = ({ onNavigateToLogin }) => {
         }
         */
 
-        console.log('Signup data:', formData);
-        alert('Signup functionality - Connect to backend');
+        try {
+            const created = await auth.register(
+                `${formData.firstName} ${formData.lastName}`,
+                formData.email,
+                formData.password
+            );
+            if (created && (created as any).role === 'admin') {
+                navigate('/admin');
+            } else {
+                navigate('/');
+            }
+        } catch (err: any) {
+            console.error('Signup error', err);
+            alert(err?.response?.data?.message || 'Signup failed');
+        }
     };
 
     const handleDemoClick = () => {
@@ -97,25 +115,25 @@ const SignupPage: React.FC<SignupPageProps> = ({ onNavigateToLogin }) => {
     return (
         <>
             {/* Left Panel - Hidden on mobile */}
-            <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 to-purple-700 text-white p-12 flex-col">
-                <button className="flex items-center gap-2 text-black mb-12 hover:opacity-80 transition-opacity">
+            <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-sky-600 to-indigo-700 text-white p-12 flex-col">
+                <button className="flex items-center gap-2 text-white/90 mb-12 hover:opacity-90 transition-opacity">
                     <ArrowLeft size={20} />
                     <span className="text-base">Back to Home</span>
                 </button>
 
                 <div className="flex items-center gap-3 mb-12">
-                    <div className="w-12 h-12 bg-black bg-opacity-20 rounded-lg flex items-center justify-center backdrop-blur-sm">
-                        <Shield className="text-white" size={28} />
+                    <div className="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center backdrop-blur-sm">
+                        <Shield className="text-white" size={26} />
                     </div>
-                    <h1 className="text-2xl font-bold">ShopPulse Analytics</h1>
+                    <h1 className="text-2xl font-bold">ShopEase</h1>
                 </div>
 
-                <h2 className="text-5xl font-bold mb-6 leading-tight">
-                    E-Commerce Analytics That Drive Sales
+                <h2 className="text-4xl font-extrabold mb-4 leading-tight">
+                    Grow your store with confidence
                 </h2>
 
-                <p className="text-xl mb-12 text-blue-50 leading-relaxed">
-                    Understand your customers better. Track shopping behavior, optimize conversions, and boost revenue with real-time e-commerce analytics.
+                <p className="text-lg mb-8 text-white/90 leading-relaxed">
+                    Actionable analytics and a simple storefront to connect customers with the products they love.
                 </p>
 
                 <div className="space-y-4 mb-12">
@@ -125,12 +143,12 @@ const SignupPage: React.FC<SignupPageProps> = ({ onNavigateToLogin }) => {
                         'Product page heatmaps',
                         'Conversion funnel insights'
                     ].map((item, index) => (
-                        <div key={index} className="flex items-center gap-3">
-                            <div className="w-7 h-7 rounded-full bg-white bg-opacity-20 flex items-center justify-center backdrop-blur-sm">
-                                <Check size={18} className="text-white" strokeWidth={3} />
-                            </div>
-                            <span className="text-lg text-white">{item}</span>
-                        </div>
+                                        <div key={index} className="flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                                                <Check size={16} className="text-white" strokeWidth={3} />
+                                            </div>
+                                            <span className="text-base text-white">{item}</span>
+                                        </div>
                     ))}
                 </div>
 
@@ -138,19 +156,19 @@ const SignupPage: React.FC<SignupPageProps> = ({ onNavigateToLogin }) => {
             </div>
 
             {/* Right Panel - Signup Form */}
-            <div className="w-full lg:w-1/2 bg-white dark:bg-gray-900 flex items-center justify-center p-6 md:p-12">
+            <div className="w-full lg:w-1/2 bg-white flex items-center justify-center p-6 md:p-12">
                 <div className="w-full max-w-md">
                     {/* Mobile Logo */}
                     <div className="lg:hidden flex items-center gap-3 mb-8 justify-center">
-                        <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-700 rounded-lg flex items-center justify-center">
-                            <Shield className="text-white" size={24} />
+                        <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-pink-500 rounded-lg flex items-center justify-center">
+                            <Shield className="text-white" size={22} />
                         </div>
-                        <h1 className="text-xl font-bold text-gray-900 dark:text-white">ShopPulse Analytics</h1>
+                        <h1 className="text-xl font-bold text-gray-900">ShopEase</h1>
                     </div>
 
                     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 md:p-8 border border-gray-200 dark:border-gray-700">
-                        <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2">Create Your Account</h2>
-                        <p className="text-sm md:text-base text-gray-600 dark:text-gray-400 mb-6 md:mb-8">Start optimizing your online store today</p>
+                        <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Create your account</h2>
+                        <p className="text-sm md:text-base text-gray-600 mb-6 md:mb-8">Start selling and using analytics to grow your business.</p>
 
                         <div className="space-y-4 md:space-y-5">
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -163,7 +181,7 @@ const SignupPage: React.FC<SignupPageProps> = ({ onNavigateToLogin }) => {
                                         placeholder="John"
                                         value={formData.firstName}
                                         onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                                        className="w-full px-4 py-3 text-base rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+                                        className="w-full px-4 py-3 text-base rounded-lg border border-gray-200 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400"
                                         required
                                     />
                                 </div>
@@ -274,9 +292,9 @@ const SignupPage: React.FC<SignupPageProps> = ({ onNavigateToLogin }) => {
 
                             <button
                                 onClick={handleSignup}
-                                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 text-base rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+                                className="w-full bg-gradient-to-r from-orange-400 to-pink-500 text-white py-3 text-base rounded-lg font-semibold hover:from-orange-500 hover:to-pink-600 transition-all duration-200 shadow-md hover:shadow-lg"
                             >
-                                Start Free Trial
+                                Create account
                             </button>
 
                             <div className="text-center text-gray-500 dark:text-gray-400 text-sm">OR</div>
@@ -320,44 +338,23 @@ const LoginPage: React.FC<LoginPageProps> = ({ onNavigateToSignup }) => {
     });
     const [showPassword, setShowPassword] = useState(false);
 
-    // TODO: Connect to backend - POST /api/auth/login
-    const handleLogin = async (e: React.FormEvent) => {
+        const navigate = useNavigate();
+        const auth = useAuth();
+
+        // Connect to backend - POST /api/auth/login
+        const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-
-        /* 
-        // Backend Integration Example:
-        try {
-          const response = await fetch('http://localhost:5000/api/auth/login', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              email: formData.email,
-              password: formData.password
-            }),
-          });
-          
-          const data = await response.json();
-          
-          if (response.ok) {
-            // Store token in localStorage
-            localStorage.setItem('token', data.token);
-            // Store user data if needed
-            localStorage.setItem('user', JSON.stringify(data.user));
-            // Redirect to dashboard
-            window.location.href = '/dashboard';
-          } else {
-            alert(data.message || 'Login failed');
-          }
-        } catch (error) {
-          console.error('Login error:', error);
-          alert('An error occurred during login');
-        }
-        */
-
-        console.log('Login data:', formData);
-        alert('Login functionality - Connect to backend');
+                try {
+                    const logged = await auth.login(formData.email, formData.password);
+                    if (logged && (logged as any).role === 'admin') {
+                        navigate('/admin');
+                    } else {
+                        navigate('/');
+                    }
+                } catch (err: any) {
+                    console.error('Login error', err);
+                    alert(err?.response?.data?.message || 'Login failed');
+                }
     };
 
     const handleDemoAccess = () => {
@@ -375,17 +372,17 @@ const LoginPage: React.FC<LoginPageProps> = ({ onNavigateToSignup }) => {
     return (
         <>
             {/* Left Panel - Hidden on mobile */}
-            <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 to-purple-700 text-white p-12 flex-col">
+            <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-sky-600 to-indigo-700 text-white p-12 flex-col">
                 <button className="flex items-center gap-2 text-black mb-12 hover:opacity-80 transition-opacity">
                     <ArrowLeft size={20} />
                     <span className="text-base">Back to Home</span>
                 </button>
 
                 <div className="flex items-center gap-3 mb-12">
-                    <div className="w-12 h-12 bg-black bg-opacity-20 rounded-lg flex items-center justify-center backdrop-blur-sm">
-                        <Shield className="text-white" size={28} />
+                    <div className="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center backdrop-blur-sm">
+                        <Shield className="text-white" size={26} />
                     </div>
-                    <h1 className="text-2xl font-bold">ShopPulse Analytics</h1>
+                    <h1 className="text-2xl font-bold">ShopEase</h1>
                 </div>
 
                 <h2 className="text-5xl font-bold mb-6 leading-tight">
@@ -430,19 +427,19 @@ const LoginPage: React.FC<LoginPageProps> = ({ onNavigateToSignup }) => {
             </div>
 
             {/* Right Panel - Login Form */}
-            <div className="w-full lg:w-1/2 bg-white dark:bg-gray-900 flex items-center justify-center p-6 md:p-12">
+            <div className="w-full lg:w-1/2 bg-white flex items-center justify-center p-6 md:p-12">
                 <div className="w-full max-w-md">
                     {/* Mobile Logo */}
                     <div className="lg:hidden flex items-center gap-3 mb-8 justify-center">
-                        <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-700 rounded-lg flex items-center justify-center">
-                            <Shield className="text-white" size={24} />
+                        <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-pink-500 rounded-lg flex items-center justify-center">
+                            <Shield className="text-white" size={22} />
                         </div>
-                        <h1 className="text-xl font-bold text-gray-900 dark:text-white">ShopPulse Analytics</h1>
+                        <h1 className="text-xl font-bold text-gray-900">ShopEase</h1>
                     </div>
 
                     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 md:p-8 border border-gray-200 dark:border-gray-700">
-                        <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2">Welcome Back</h2>
-                        <p className="text-sm md:text-base text-gray-600 dark:text-gray-400 mb-6 md:mb-8">Sign in to your e-commerce dashboard</p>
+                        <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Welcome back</h2>
+                        <p className="text-sm md:text-base text-gray-600 mb-6 md:mb-8">Sign in to your ShopEase account</p>
 
                         <div className="space-y-4 md:space-y-5">
                             <div>
@@ -454,7 +451,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onNavigateToSignup }) => {
                                     placeholder="Enter your email"
                                     value={formData.email}
                                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                    className="w-full px-4 py-3 text-base rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+                                    className="w-full px-4 py-3 text-base rounded-lg border border-gray-200 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400"
                                     required
                                 />
                             </div>
@@ -484,9 +481,9 @@ const LoginPage: React.FC<LoginPageProps> = ({ onNavigateToSignup }) => {
 
                             <button
                                 onClick={handleLogin}
-                                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 text-base rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+                                className="w-full bg-gradient-to-r from-orange-400 to-pink-500 text-white py-3 text-base rounded-lg font-semibold hover:from-orange-500 hover:to-pink-600 transition-all duration-200 shadow-md hover:shadow-lg"
                             >
-                                Sign In
+                                Sign in
                             </button>
 
                             <div className="text-center text-gray-500 dark:text-gray-400 text-sm">OR</div>

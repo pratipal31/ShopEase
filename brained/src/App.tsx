@@ -4,15 +4,30 @@ import LoginPage from './login/page';
 import ProductDetail from './components/pages/ProductDetail';
 import AboutPage from './components/pages/AboutPage';
 import './App.css';
+import AdminLayout from './pages/Admin/Layout';
+import RequireAdmin from './components/RequireAdmin';
+import AdminProducts from './pages/Admin/Products';
+import Profile from './pages/Profile';
+import Navbar from './components/pages/Navbar';
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<HomePage />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/product/:id" element={<ProductDetail />} />
-      <Route path="/about" element={<AboutPage />} />
-    </Routes>
+    <>
+      <Navbar />
+      <div className="pt-20">
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/product/:id" element={<ProductDetail />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/profile" element={<Profile />} />
+
+          <Route path="/admin" element={<RequireAdmin><AdminLayout /></RequireAdmin>}>
+            <Route path="products" element={<AdminProducts />} />
+          </Route>
+        </Routes>
+      </div>
+    </>
   );
 }
 

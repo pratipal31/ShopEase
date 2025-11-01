@@ -2,18 +2,38 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
+const cookieParser = require('cookie-parser');
 
 const app = express();
 
 // middleware
 app.use(express.json());
+app.use(cookieParser());
 
-const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:3000';
-app.use(cors({ origin: CLIENT_URL }));
+// Support a comma-separated list of allowed client origins via CLIENT_URLS
+// Fallback to CLIENT_URL for single-value usage, then a default of localhost:3000
+const rawClientList = process.env.CLIENT_URLS || process.env.CLIENT_URL || 'http://localhost:3000';
+const CLIENT_ORIGINS = rawClientList.split(',').map((u) => u.trim());
+
+// Allow credentials so refresh token cookie (httpOnly) is accepted by browser
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow non-browser requests like curl/postman (no origin)
+    if (!origin) return callback(null, true);
+    if (CLIENT_ORIGINS.indexOf(origin) !== -1) {
+      return callback(null, true);
+    }
+    return callback(new Error('CORS: Origin not allowed'));
+  },
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
 
 // routes
 const authRoutes = require('./routes/auth');
 const analyticsRoutes = require('./routes/analytics');
+const productsRoutes = require('./routes/products');
 const rateLimiter = require('./middleware/rateLimiter');
 const deviceInfo = require('./middleware/deviceInfo');
 
@@ -29,6 +49,9 @@ app.get('/api/health', (req, res) => {
 
 // Mount analytics routes with deviceInfo middleware to capture UA data
 app.use('/api/analytics', deviceInfo, analyticsRoutes);
+
+// products API
+app.use('/api/products', productsRoutes);
 
 // health
 app.get('/', (req, res) => res.json({ message: 'Brained API' }));
