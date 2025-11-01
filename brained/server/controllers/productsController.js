@@ -17,7 +17,19 @@ exports.createProduct = async (req, res) => {
 
 exports.getProducts = async (req, res) => {
   try {
-    const products = await Product.find().sort({ createdAt: -1 }).limit(100);
+    const { category, q } = req.query;
+    const filter = {};
+    if (category) {
+      // match exact category string (case-insensitive)
+      filter.category = new RegExp(`^${category}$`, 'i');
+    }
+    if (q) {
+      // simple text search on title or description
+      const re = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, ''), 'i');
+      filter.$or = [{ title: re }, { description: re }];
+    }
+
+    const products = await Product.find(filter).sort({ createdAt: -1 }).limit(200);
     res.json(products);
   } catch (err) {
     console.error(err);

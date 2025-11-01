@@ -30,30 +30,33 @@ const ProductList: React.FC = () => {
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
   const { addItem } = useCart();
 
-  useEffect(() => {
-    loadProducts();
-  }, []);
+  
 
   // Parse category filter from query params
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const category = params.get('category');
+    const q = params.get('q') || params.get('search');
     setCategoryFilter(category);
-    if (category) {
-      trackingClient.trackCustomEvent('category_view', { category });
-    }
+    // fetch products filtered by category or search term
+    const fetchFiltered = async () => {
+      setLoading(true);
+      try {
+        const data = await getProducts({ category, q });
+        setProducts(data || []);
+        if (category) {
+          trackingClient.trackCustomEvent('category_view', { category });
+        }
+      } catch (e) {
+        console.error('Failed to load products:', e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchFiltered();
   }, [location.search]);
 
-  const loadProducts = async () => {
-    try {
-      const data = await getProducts();
-      setProducts(data);
-    } catch (e) {
-      console.error('Failed to load products:', e);
-    } finally {
-      setLoading(false);
-    }
-  };
+  
 
   const toggleFavorite = (productId: string) => {
     setFavorites((prev) =>
