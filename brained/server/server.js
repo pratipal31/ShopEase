@@ -18,17 +18,49 @@ app.use(cookieParser());
 // Support a comma-separated list of allowed client origins via CLIENT_URLS
 // Fallback to CLIENT_URL for single-value usage, then a default of localhost:3000
 const rawClientList = process.env.CLIENT_URLS || process.env.CLIENT_URL || 'http://localhost:3000';
-const CLIENT_ORIGINS = rawClientList.split(',').map((u) => u.trim());
+const CLIENT_ORIGINS = rawClientList.split(',').map((u) => u.trim()).filter(Boolean);
+
+// Optional: allow domain suffixes for preview environments (e.g., *.vercel.app)
+// Set CLIENT_URL_SUFFIXES="vercel.app,example.dev" to allow any origin whose hostname ends with one of these.
+const rawSuffixList = process.env.CLIENT_URL_SUFFIXES || '';
+const CLIENT_ORIGIN_SUFFIXES = rawSuffixList
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean);
+
+const CORS_DEBUG = /^(1|true|yes)$/i.test(process.env.CORS_DEBUG || '');
+
+function isAllowedOrigin(origin) {
+  try {
+    // Allow non-browser requests like curl/postman (no origin)
+    if (!origin) return true;
+
+    if (CLIENT_ORIGINS.includes(origin)) return true;
+
+    if (CLIENT_ORIGIN_SUFFIXES.length > 0) {
+      const { hostname } = new URL(origin);
+      for (const suffix of CLIENT_ORIGIN_SUFFIXES) {
+        if (hostname === suffix || hostname.endsWith('.' + suffix)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  } catch (e) {
+    // If origin can't be parsed, deny
+    return false;
+  }
+}
 
 // Allow credentials so refresh token cookie (httpOnly) is accepted by browser
 const corsOptions = {
   origin: function (origin, callback) {
-    // Allow non-browser requests like curl/postman (no origin)
-    if (!origin) return callback(null, true);
-    if (CLIENT_ORIGINS.indexOf(origin) !== -1) {
-      return callback(null, true);
+    const allowed = isAllowedOrigin(origin);
+    if (CORS_DEBUG) {
+      console.log(`[CORS] origin=${origin || 'null'} allowed=${allowed}`);
     }
-    return callback(new Error('CORS: Origin not allowed'));
+    return allowed ? callback(null, true) : callback(new Error('CORS: Origin not allowed'));
   },
   credentials: true,
 };
@@ -38,7 +70,13 @@ app.use(cors(corsOptions));
 // Socket.IO setup
 const io = new Server(server, {
   cors: {
-    origin: CLIENT_ORIGINS,
+    origin: function (origin, callback) {
+      const allowed = isAllowedOrigin(origin);
+      if (CORS_DEBUG) {
+        console.log(`[Socket.IO CORS] origin=${origin || 'null'} allowed=${allowed}`);
+      }
+      return allowed ? callback(null, true) : callback(new Error('CORS: Origin not allowed'));
+    },
     credentials: true,
   },
 });
