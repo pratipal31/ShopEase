@@ -9,11 +9,10 @@ import Navbar from './components/pages/Navbar.tsx'
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
+    <Navbar/>
       <AuthProvider>
         <App />
       </AuthProvider>
-    <Navbar/>
-      <App />
     </BrowserRouter>
   </StrictMode>,
 )
