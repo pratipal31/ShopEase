@@ -1,13 +1,15 @@
 import React from "react";
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from '../../context/AuthContext';
-import { Menu, X, ShoppingBag } from "lucide-react";
+import { useCart } from '../../context/CartContext';
+import { Menu, X, ShoppingBag, ShoppingCart } from "lucide-react";
 import trackingClient from '../../services/trackingClient';
 
 const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const activeLink = location.pathname;
 
   const toggleMenu = (): void => setIsMenuOpen((prev) => !prev);
@@ -30,6 +32,18 @@ const Navbar: React.FC = () => {
 
   let auth: any = null;
   try { auth = useAuth(); } catch (e) { auth = null; }
+
+  let cart: any = null;
+  try { cart = useCart(); } catch (e) { cart = null; }
+
+  const handleCartClick = () => {
+    // Allow cart access without login
+    trackingClient.trackCustomEvent('cart_click', { 
+      itemCount: cart?.totalItems || 0,
+      authenticated: !!(auth && auth.user)
+    });
+    navigate('/cart');
+  };
 
   return (
     <nav className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-white/80 backdrop-blur-md border border-gray-100 z-50 rounded-2xl w-[95%] max-w-7xl">
@@ -71,6 +85,21 @@ const Navbar: React.FC = () => {
                 aria-label="Search products"
               />
             </form>
+            
+            {/* Cart Button */}
+            <button
+              onClick={handleCartClick}
+              className="relative ml-2 p-2 text-gray-700 hover:text-orange-500 hover:bg-orange-50 rounded-md transition"
+              aria-label="Shopping cart"
+            >
+              <ShoppingCart className="w-5 h-5" />
+              {cart && cart.totalItems > 0 && (
+                <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                  {cart.totalItems > 99 ? '99+' : cart.totalItems}
+                </span>
+              )}
+            </button>
+
             <div className="flex items-center gap-2 ml-2">
               {auth && auth.user ? (
                 <>
@@ -136,11 +165,61 @@ const Navbar: React.FC = () => {
                 aria-label="Search products"
               />
             </form>
-            <Link to="/login" onClick={() => setIsMenuOpen(false)}>
-              <button className="w-full mt-2 text-white bg-orange-500 hover:bg-orange-600 px-4 py-2.5 rounded-full text-base font-medium transition">
-                Login
-              </button>
-            </Link>
+            
+            {/* Mobile Cart Button */}
+            <button
+              onClick={() => {
+                handleCartClick();
+                setIsMenuOpen(false);
+              }}
+              className="w-full mt-2 flex items-center justify-between px-3 py-2.5 rounded-lg text-base font-medium text-gray-800 hover:bg-gray-100 transition"
+            >
+              <span className="flex items-center gap-2">
+                <ShoppingCart className="w-5 h-5" />
+                Shopping Cart
+              </span>
+              {cart && cart.totalItems > 0 && (
+                <span className="bg-orange-500 text-white text-xs font-bold rounded-full px-2 py-1 min-w-6 text-center">
+                  {cart.totalItems > 99 ? '99+' : cart.totalItems}
+                </span>
+              )}
+            </button>
+
+            {/* Mobile Auth Section */}
+            {auth && auth.user ? (
+              <div className="pt-3 border-t border-gray-200 mt-3 space-y-2">
+                {auth.user.role === 'admin' && (
+                  <Link to="/admin/products" onClick={() => setIsMenuOpen(false)}>
+                    <button className="w-full text-left px-3 py-2.5 rounded-lg text-base font-medium text-gray-800 hover:bg-gray-100 transition">
+                      Admin Dashboard
+                    </button>
+                  </Link>
+                )}
+                <Link to="/profile" onClick={() => setIsMenuOpen(false)}>
+                  <button className="w-full text-left px-3 py-2.5 rounded-lg text-base font-medium text-gray-800 hover:bg-gray-100 transition flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-orange-500 text-white flex items-center justify-center text-sm font-semibold">
+                      {(auth.user.name || auth.user.email || 'U').charAt(0).toUpperCase()}
+                    </div>
+                    {auth.user.name || auth.user.email}
+                  </button>
+                </Link>
+                <button
+                  onClick={async () => {
+                    await auth.logout();
+                    setIsMenuOpen(false);
+                  }}
+                  className="w-full text-left px-3 py-2.5 rounded-lg text-base font-medium text-red-600 hover:bg-red-50 transition"
+                >
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <Link to="/login" onClick={() => setIsMenuOpen(false)}>
+                <button className="w-full mt-2 text-white bg-orange-500 hover:bg-orange-600 px-4 py-2.5 rounded-full text-base font-medium transition">
+                  Login
+                </button>
+              </Link>
+            )}
           </div>
         </div>
       )}

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, Outlet, useLocation } from 'react-router-dom';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   TrendingUp,
@@ -14,6 +14,9 @@ import {
   Settings,
   Circle,
   ChevronRight,
+  LogOut,
+  Store,
+  User,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -34,9 +37,15 @@ import { Button } from '../../components/ui/button';
 import { Separator } from '../../components/ui/separator';
 import trackingClient from '../../services/trackingClient';
 import api from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 
 const AdminLayout: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  
+  let auth: any = null;
+  try { auth = useAuth(); } catch (e) { auth = null; }
+  
   // Recording control component
   const RecordingControl: React.FC = () => {
     const [isRec, setIsRec] = useState<boolean>(false);
@@ -237,9 +246,88 @@ const AdminLayout: React.FC = () => {
         </SidebarContent>
 
         <SidebarFooter>
-          <div className="p-2">
-            <Separator className="mb-2" />
+          <div className="p-2 space-y-2">
+            {/* Quick Actions */}
+            <div className="group-data-[collapsible=icon]:hidden space-y-1">
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full justify-start"
+                asChild
+              >
+                <Link to="/">
+                  <Store className="w-4 h-4 mr-2" />
+                  View Store
+                </Link>
+              </Button>
+              
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full justify-start"
+                asChild
+              >
+                <Link to="/profile">
+                  <User className="w-4 h-4 mr-2" />
+                  Profile
+                </Link>
+              </Button>
+              
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
+                onClick={async () => {
+                  if (auth && auth.logout) {
+                    await auth.logout();
+                    navigate('/login');
+                  }
+                }}
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Logout
+              </Button>
+            </div>
+            
+            <Separator className="my-2" />
             <RecordingControl />
+            
+            {/* User info when collapsed */}
+            <div className="hidden group-data-[collapsible=icon]:flex flex-col items-center gap-1 pt-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                asChild
+              >
+                <Link to="/">
+                  <Store className="w-4 h-4" />
+                </Link>
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                asChild
+              >
+                <Link to="/profile">
+                  <User className="w-4 h-4" />
+                </Link>
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-red-600 hover:text-red-700"
+                onClick={async () => {
+                  if (auth && auth.logout) {
+                    await auth.logout();
+                    navigate('/login');
+                  }
+                }}
+              >
+                <LogOut className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
         </SidebarFooter>
       </Sidebar>

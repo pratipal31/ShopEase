@@ -29,6 +29,7 @@ import FunnelAnalysis from "./pages/Admin/FunnelAnalysis";
 import CohortAnalysis from "./pages/Admin/CohortAnalysis";
 import ABTesting from "./pages/Admin/ABTesting";
 import SearchResults from "./components/pages/SearchResults";
+import OrderSuccess from "./components/pages/OrderSuccess";
 
 function App() {
   const location = useLocation();
@@ -56,6 +57,7 @@ function App() {
             <Route path="/search" element={<SearchResults />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
+            <Route path="/order-success" element={<OrderSuccess />} />
             {/* Admin Routes */}
             <Route
               path="/admin"

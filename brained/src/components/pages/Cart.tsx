@@ -1,12 +1,17 @@
 import { Link, useNavigate } from "react-router-dom";
-import { Minus, Plus, ShoppingBag, Trash2, ArrowLeft, Tag } from "lucide-react";
+import { Minus, Plus, ShoppingBag, Trash2, ArrowLeft, Tag, Lock } from "lucide-react";
 import trackingClient from "../../services/trackingClient";
 import { useCart } from "../../context/CartContext";
+import { useAuth } from "../../context/AuthContext";
 import { useEffect } from "react";
 
 export default function Cart() {
   const navigate = useNavigate();
   const { items, removeItem, updateQuantity, clear, subtotal, totalItems } = useCart();
+  
+  let auth: any = null;
+  try { auth = useAuth(); } catch (e) { auth = null; }
+  const isLoggedIn = !!(auth && auth.user);
 
   useEffect(() => {
     trackingClient.trackCustomEvent('page_view', { page: '/cart' });
@@ -26,12 +31,22 @@ export default function Cart() {
   };
 
   const handleCheckout = () => {
-    trackingClient.trackCustomEvent('begin_checkout', { 
-      source: 'cart_page',
-      total,
-      itemCount: totalItems 
-    });
-    navigate('/checkout');
+    if (!isLoggedIn) {
+      // Not logged in - redirect to login with return URL to checkout
+      trackingClient.trackCustomEvent('checkout_login_required', { 
+        total,
+        itemCount: totalItems 
+      });
+      navigate('/login', { state: { from: '/checkout' } });
+    } else {
+      // Logged in - proceed to checkout
+      trackingClient.trackCustomEvent('begin_checkout', { 
+        source: 'cart_page',
+        total,
+        itemCount: totalItems 
+      });
+      navigate('/checkout');
+    }
   };
 
   // Empty cart state
@@ -262,10 +277,17 @@ export default function Cart() {
 
               <button
                 onClick={handleCheckout}
-                className="w-full py-4 px-6 bg-linear-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                className="w-full py-4 px-6 bg-linear-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center gap-2"
               >
-                Proceed to Checkout
+                {!isLoggedIn && <Lock className="w-5 h-5" />}
+                {isLoggedIn ? 'Proceed to Checkout' : 'Login to Checkout'}
               </button>
+
+              {!isLoggedIn && (
+                <p className="text-xs text-center text-gray-600 dark:text-gray-400 mt-2">
+                  You need to login or create an account to complete your purchase
+                </p>
+              )}
 
               <p className="text-xs text-center text-gray-500 dark:text-gray-400 mt-4">
                 Secure checkout powered by Stripe

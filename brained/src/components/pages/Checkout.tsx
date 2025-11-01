@@ -1,10 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import trackingClient from '../../services/trackingClient';
 import { useNavigate } from 'react-router-dom';
+import { useCart } from '../../context/CartContext';
+import { useAuth } from '../../context/AuthContext';
+import axios from 'axios';
+
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5001';
 
 export default function Checkout() {
   const navigate = useNavigate();
+  const { items, clear, subtotal } = useCart();
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  let auth: any = null;
+  try { auth = useAuth(); } catch (e) { auth = null; }
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!auth || !auth.user) {
+      navigate('/login', { state: { from: '/checkout' } });
+    }
+  }, [auth, navigate]);
+
+  // Redirect to cart if empty
+  useEffect(() => {
+    if (items.length === 0) {
+      navigate('/cart');
+    }
+  }, [items, navigate]);
+
+  const shipping = subtotal > 0 ? (subtotal >= 100 ? 0 : 10) : 0;
+  const tax = subtotal * 0.08;
+  const total = subtotal + shipping + tax;
 
   const [form, setForm] = useState({
     name: '',
@@ -13,6 +41,7 @@ export default function Checkout() {
     city: '',
     country: '',
     zip: '',
+    phone: '',
     cardName: '',
     cardNumber: '',
     exp: '',
@@ -27,17 +56,81 @@ export default function Checkout() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    // Do not send sensitive info in tracking
-    trackingClient.trackCustomEvent('purchase', {
-      total: 199.99,
-      currency: 'USD',
-      items: 1,
-      source: 'checkout_page',
-    });
-    setTimeout(() => {
+    setError('');
+
+    try {
+      const token = localStorage.getItem('token');
+      
+      // Create order in backend
+      const response = await axios.post(
+        `${API_BASE}/api/orders`,
+        {
+          items: items.map(item => ({
+            productId: item.id,
+            title: item.title,
+            price: item.price,
+            quantity: item.quantity,
+            image: item.image,
+            category: item.category,
+            color: item.color,
+            size: item.size,
+          })),
+          shippingInfo: {
+            name: form.name || 'Guest User',
+            email: form.email || auth?.user?.email || 'guest@example.com',
+            address: form.address || 'Not provided',
+            city: form.city || 'Not provided',
+            country: form.country || 'Not provided',
+            zip: form.zip || 'N/A',
+            phone: form.phone || '',
+          },
+          paymentInfo: {
+            cardName: 'Online Payment',
+            cardLastFour: '****',
+          },
+          pricing: {
+            subtotal,
+            shipping,
+            tax,
+            total,
+          },
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      // Track purchase event
+      trackingClient.trackCustomEvent('purchase', {
+        orderNumber: response.data.order.orderNumber,
+        total,
+        currency: 'USD',
+        itemCount: items.length,
+        source: 'checkout_page',
+      });
+
+      // Clear cart
+      clear();
+
+      // Navigate to success page with order data
+      navigate('/order-success', {
+        state: {
+          order: response.data.order,
+        },
+      });
+    } catch (err: any) {
+      console.error('Error creating order:', err);
+      setError(err.response?.data?.message || 'Failed to process order. Please try again.');
+      trackingClient.trackCustomEvent('checkout_error', {
+        error: err.message,
+        total,
+      });
+    } finally {
       setLoading(false);
-      navigate('/');
-    }, 800);
+    }
   };
 
   return (
@@ -45,6 +138,13 @@ export default function Checkout() {
       <div className="h-20 sm:h-24" />
       <div className="max-w-4xl mx-auto p-6">
         <h1 className="text-3xl font-bold text-gray-900 mb-6">Checkout</h1>
+        
+        {error && (
+          <div className="mb-6 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
+            {error}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-6 rounded-xl shadow">
           <div className="md:col-span-2">
             <h2 className="text-lg font-semibold text-gray-800">Shipping Information</h2>
@@ -96,7 +196,7 @@ export default function Checkout() {
 
           <div className="md:col-span-2">
             <button type="submit" disabled={loading} className="w-full rounded-md bg-orange-500 text-white py-3 font-semibold hover:bg-orange-600 transition disabled:bg-gray-300">
-              {loading ? 'Processing...' : 'Pay $199.99'}
+              {loading ? 'Processing...' : `Pay $${total.toFixed(2)}`}
             </button>
           </div>
         </form>

@@ -78,6 +78,7 @@ const dashboardRoutes = require('./routes/dashboard');
 const funnelsRoutes = require('./routes/funnels');
 const cohortsRoutes = require('./routes/cohorts');
 const experimentsRoutes = require('./routes/experiments');
+const ordersRoutes = require('./routes/orders');
 const rateLimiter = require('./middleware/rateLimiter');
 const deviceInfo = require('./middleware/deviceInfo');
 
@@ -111,6 +112,9 @@ app.use('/api/cohorts', cohortsRoutes);
 
 // experiments API (A/B testing)
 app.use('/api/experiments', experimentsRoutes);
+
+// orders API
+app.use('/api/orders', ordersRoutes);
 
 // health
 app.get('/', (req, res) => res.json({ message: 'Brained API' }));
