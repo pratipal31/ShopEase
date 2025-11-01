@@ -16,7 +16,7 @@ import Navbar from "./components/pages/Navbar";
 import ProductList from "./components/pages/ProductList";
 import Category from "./components/pages/Categories";
 import Cart from "./components/pages/Cart";
-
+import Footer from "./components/pages/Footer";
 // New Analytics Pages
 import RealTimeAnalyticsDashboard from "./pages/Admin/RealTimeAnalyticsDashboard";
 import RecordingsList from "./pages/Admin/RecordingsList";
@@ -73,6 +73,7 @@ function App() {
           </Route>
         </Routes>
       </div>
+      <Footer />
     </div>
   );
 }

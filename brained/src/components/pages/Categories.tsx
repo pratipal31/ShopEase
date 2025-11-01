@@ -138,6 +138,7 @@ const items = [
 export default function Category() {
   return (
     <section className="w-full bg-gray-50 dark:bg-black">
+        <div className="h-10 sm:h-14"></div> 
       <div className="w-full text-center mb-12 px-4 sm:px-6 lg:px-8">
         <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
           Explore Our Categories

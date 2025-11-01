@@ -22,60 +22,13 @@ function HomePage() {
             }
         })();
     }, []);
-    const navigate = useNavigate();
-    // sample products
-    const products = [
-        {
-            id: 1,
-            name: 'Classic Leather Jacket',
-            price: 189,
-            category: 'Fashion',
-            image: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=500&h=500&fit=crop'
-        },
-        {
-            id: 2,
-            name: 'Wireless Headphones',
-            price: 129,
-            category: 'Electronics',
-            image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&h=500&fit=crop'
-        },
-        {
-            id: 3,
-            name: 'Running Shoes',
-            price: 95,
-            category: 'Sports',
-            image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=500&fit=crop'
-        },
-        {
-            id: 4,
-            name: 'Smart Watch',
-            price: 249,
-            category: 'Electronics',
-            image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&h=500&fit=crop'
-        },
-        {
-            id: 5,
-            name: 'Laptop Backpack',
-            price: 59,
-            category: 'Accessories',
-            image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=500&h=500&fit=crop'
-        },
-        {
-            id: 6,
-            name: 'Coffee Maker',
-            price: 79,
-            category: 'Home',
-            image: 'https://images.unsplash.com/photo-1517668808822-9ebb02f2a0e6?w=500&h=500&fit=crop'
-        },
-    ];
-
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col overflow-x-hidden">
             {/* Navbar */}
             <Navbar />
 
             {/* Spacer for fixed navbar */}
-            {/* <div className="h-20 sm:h-24"></div> */}
+             <div className="h-10 sm:h-14"></div> 
 
             {/* Banner Section */}
             <Banner />
@@ -133,44 +86,6 @@ function HomePage() {
                             ))}
                         </div>
                     )}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-                        {products.map((product) => (
-                            <div
-                                key={product.id}
-                                className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-2xl transition-all duration-300 group cursor-pointer"
-                                onClick={() => navigate(`/product/${product.id}`)}
-                            >
-                                <div className="relative overflow-hidden bg-gray-100">
-                                    <img
-                                        src={product.image}
-                                        alt={product.name}
-                                        className="w-full h-56 sm:h-64 md:h-72 object-cover group-hover:scale-110 transition-transform duration-500"
-                                    />
-                                </div>
-                                <div className="p-5 sm:p-6">
-                                    <div className="text-sm text-gray-500 mb-2">{product.category}</div>
-                                    <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 sm:mb-4">
-                                        {product.name}
-                                    </h3>
-                                    <div className="flex items-center justify-between gap-3">
-                                        <span className="text-2xl sm:text-3xl font-bold text-gray-900">
-                                            ${product.price}
-                                        </span>
-                                        <button
-                                            className="px-4 sm:px-5 py-2.5 bg-orange-500 text-white rounded-lg text-sm sm:text-base font-medium hover:bg-orange-600 transition whitespace-nowrap shadow-md hover:shadow-lg"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                // TODO: Add to cart functionality
-                                                console.log('Add to cart:', product.id);
-                                            }}
-                                        >
-                                            Add to Cart
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
                 </div>
             </section>
 
@@ -233,59 +148,6 @@ function HomePage() {
                     </div>
                 </div>
             </section>
-
-            {/* Footer */}
-            <footer className="w-full bg-gray-900 text-gray-300 mt-auto">
-                <div className="w-full px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-8 sm:gap-10 mb-10 sm:mb-12">
-                        <div>
-                            <h4 className="font-semibold text-white mb-4 text-base sm:text-lg">Shop</h4>
-                            <ul className="space-y-2.5 text-sm sm:text-base">
-                                <li><a href="#" className="hover:text-white transition">All Products</a></li>
-                                <li><a href="#" className="hover:text-white transition">New Arrivals</a></li>
-                                <li><a href="#" className="hover:text-white transition">Best Sellers</a></li>
-                                <li><a href="#" className="hover:text-white transition">Sale</a></li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h4 className="font-semibold text-white mb-4 text-base sm:text-lg">Company</h4>
-                            <ul className="space-y-2.5 text-sm sm:text-base">
-                                <li><a href="#" className="hover:text-white transition">About Us</a></li>
-                                <li><a href="#" className="hover:text-white transition">Contact</a></li>
-                                <li><a href="#" className="hover:text-white transition">Careers</a></li>
-                                <li><a href="#" className="hover:text-white transition">Press</a></li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h4 className="font-semibold text-white mb-4 text-base sm:text-lg">Support</h4>
-                            <ul className="space-y-2.5 text-sm sm:text-base">
-                                <li><a href="#" className="hover:text-white transition">Help Center</a></li>
-                                <li><a href="#" className="hover:text-white transition">Shipping</a></li>
-                                <li><a href="#" className="hover:text-white transition">Returns</a></li>
-                                <li><a href="#" className="hover:text-white transition">Track Order</a></li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h4 className="font-semibold text-white mb-4 text-base sm:text-lg">Legal</h4>
-                            <ul className="space-y-2.5 text-sm sm:text-base">
-                                <li><a href="#" className="hover:text-white transition">Privacy Policy</a></li>
-                                <li><a href="#" className="hover:text-white transition">Terms of Service</a></li>
-                                <li><a href="#" className="hover:text-white transition">Cookie Policy</a></li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div className="border-t border-gray-800 pt-8">
-                        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-                            <div className="flex items-center space-x-2">
-                                <ShoppingBag className="h-6 w-6 text-orange-500" />
-                                <span className="text-lg sm:text-xl font-semibold text-white">ShopEase</span>
-                            </div>
-                            <p className="text-sm sm:text-base text-center">&copy; 2025 ShopEase. All rights reserved.</p>
-                        </div>
-                    </div>
-                </div>
-            </footer>
         </div>
     );
 }

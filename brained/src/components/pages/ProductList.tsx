@@ -83,7 +83,7 @@ const ProductList: React.FC = () => {
 
   return (
     <div className="bg-gray-50 min-h-screen py-12">
-      <div className="h-20 sm:h-14"></div>
+      <div className="h-20 sm:h-8 "></div>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-12">
