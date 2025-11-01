@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
-const register = async (req, res, next) => {
+exports.register = async (req, res) => {
   try {
     const { name, email, password } = req.body;
     if (!name || !email || !password) return res.status(400).json({ message: 'Missing fields' });
@@ -19,11 +19,12 @@ const register = async (req, res, next) => {
 
     res.status(201).json({ token, user: { id: user._id, name: user.name, email: user.email } });
   } catch (err) {
-    next(err);
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
   }
 };
 
-const login = async (req, res, next) => {
+exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) return res.status(400).json({ message: 'Missing fields' });
@@ -38,8 +39,7 @@ const login = async (req, res, next) => {
 
     res.json({ token, user: { id: user._id, name: user.name, email: user.email } });
   } catch (err) {
-    next(err);
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
   }
 };
-
-module.exports = { register, login };
