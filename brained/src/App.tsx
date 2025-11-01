@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import HomePage from "./components/pages/HomePage";
 // import LandingPage from "./pages/LandingPage";
 import LoginPage from "./login/page";
@@ -31,55 +31,58 @@ import ABTesting from "./pages/Admin/ABTesting";
 import SearchResults from "./components/pages/SearchResults";
 
 function App() {
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith('/admin');
+
   return (
     <CartProvider>
-    <div className="w-full">
-      {/* Navbar should appear only once */}
-      <Navbar />
+      <div className="w-full">
+        {/* Navbar should appear only once, hide on admin routes */}
+        {!isAdminRoute && <Navbar />}
 
-      {/* Add padding to push content below navbar */}
-      <div className="pt-20 w-full">
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<HomePage />} />
-          {/* <Route path="/" element={<LandingPage />} /> */}
-          <Route path="/home" element={<HomePage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/product/:id" element={<ProductDetail />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/products" element={<ProductList />} />
-          <Route path="/categories" element={<Category />} />
-          <Route path="/search" element={<SearchResults />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/checkout" element={<Checkout />} />
-          {/* Admin Routes */}
-          <Route
-            path="/admin"
-            element={
-              <RequireAdmin>
-                <AdminLayout />
-              </RequireAdmin>
-            }
-          >
-            <Route index element={<RealTimeAnalyticsDashboard />} />
-            <Route path="dashboard" element={<RealTimeAnalyticsDashboard />} />
-            <Route path="products" element={<AdminProducts />} />
-            <Route path="analytics" element={<AdminAnalytics />} />
-            <Route path="analytics/overview" element={<RealTimeAnalyticsDashboard />} />
-            <Route path="analytics/recordings" element={<RecordingsList />} />
-            <Route path="analytics/recordings/:sessionId" element={<SessionReplayPlayer />} />
-            <Route path="analytics/heatmap" element={<HeatmapVisualization />} />
-            <Route path="analytics/performance" element={<PerformanceAnalytics />} />
-            <Route path="analytics/funnels" element={<FunnelAnalysis />} />
-            <Route path="analytics/cohorts" element={<CohortAnalysis />} />
-            <Route path="analytics/experiments" element={<ABTesting />} />
-            <Route path="tracking" element={<TrackingSetup />} />
-          </Route>
-        </Routes>
+        {/* Add padding to push content below navbar, but not on admin routes */}
+        <div className={!isAdminRoute ? "pt-20 w-full" : "w-full"}>
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<HomePage />} />
+            {/* <Route path="/" element={<LandingPage />} /> */}
+            <Route path="/home" element={<HomePage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/product/:id" element={<ProductDetail />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/products" element={<ProductList />} />
+            <Route path="/categories" element={<Category />} />
+            <Route path="/search" element={<SearchResults />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/checkout" element={<Checkout />} />
+            {/* Admin Routes */}
+            <Route
+              path="/admin"
+              element={
+                <RequireAdmin>
+                  <AdminLayout />
+                </RequireAdmin>
+              }
+            >
+              <Route index element={<RealTimeAnalyticsDashboard />} />
+              <Route path="dashboard" element={<RealTimeAnalyticsDashboard />} />
+              <Route path="products" element={<AdminProducts />} />
+              <Route path="analytics" element={<AdminAnalytics />} />
+              <Route path="analytics/overview" element={<RealTimeAnalyticsDashboard />} />
+              <Route path="analytics/recordings" element={<RecordingsList />} />
+              <Route path="analytics/recordings/:sessionId" element={<SessionReplayPlayer />} />
+              <Route path="analytics/heatmap" element={<HeatmapVisualization />} />
+              <Route path="analytics/performance" element={<PerformanceAnalytics />} />
+              <Route path="analytics/funnels" element={<FunnelAnalysis />} />
+              <Route path="analytics/cohorts" element={<CohortAnalysis />} />
+              <Route path="analytics/experiments" element={<ABTesting />} />
+              <Route path="tracking" element={<TrackingSetup />} />
+            </Route>
+          </Routes>
+        </div>
+        <Footer />
       </div>
-      <Footer />
-    </div>
     </CartProvider>
   );
 }

@@ -1,18 +1,50 @@
-import React from 'react';
-import { Link, Outlet } from 'react-router-dom';
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { Link, Outlet, useLocation } from 'react-router-dom';
+import {
+  LayoutDashboard,
+  TrendingUp,
+  Video,
+  Target,
+  Zap,
+  GitBranch,
+  Users,
+  FlaskConical,
+  BarChart3,
+  Package,
+  Settings,
+  Circle,
+  ChevronRight,
+} from 'lucide-react';
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarTrigger,
+  SidebarInset,
+} from '../../components/ui/sidebar';
+import { Button } from '../../components/ui/button';
+import { Separator } from '../../components/ui/separator';
 import trackingClient from '../../services/trackingClient';
 import api from '../../services/api';
 
 const AdminLayout: React.FC = () => {
-  // local recording control component placed here so it has access to UI state
+  const location = useLocation();
+  // Recording control component
   const RecordingControl: React.FC = () => {
     const [isRec, setIsRec] = useState<boolean>(false);
     const [loading, setLoading] = useState(false);
 
-    // load current server flag
     React.useEffect(() => {
-      api.get('/api/analytics/recording')
+      api
+        .get('/api/analytics/recording')
         .then((r) => setIsRec(!!r.data.enabled))
         .catch(() => { });
     }, []);
@@ -22,99 +54,215 @@ const AdminLayout: React.FC = () => {
       try {
         const res = await api.post('/api/analytics/recording', { enabled: !isRec });
         setIsRec(!!res.data.enabled);
-        if (res.data.enabled) trackingClient.startRecording(); else trackingClient.stopRecording();
+        if (res.data.enabled) trackingClient.startRecording();
+        else trackingClient.stopRecording();
       } catch (e) {
         console.error(e);
-      } finally { setLoading(false); }
+      } finally {
+        setLoading(false);
+      }
     };
+
     return (
-      <div className="flex items-center gap-2">
-        <button disabled={loading} onClick={toggle} className={`px-3 py-1 rounded ${isRec ? 'bg-red-500 text-white' : 'bg-green-500 text-white'} disabled:opacity-60`}>
+      <div className="flex flex-col gap-2">
+        <Button
+          disabled={loading}
+          onClick={toggle}
+          className={`w-full ${isRec
+            ? 'bg-red-600 hover:bg-red-700 text-white'
+            : 'bg-green-600 hover:bg-green-700 text-white'
+            } disabled:opacity-60`}
+          size="sm"
+        >
+          <Circle className={`w-3 h-3 mr-2 ${isRec ? 'fill-white' : ''}`} />
           {isRec ? 'Stop Recording' : 'Start Recording'}
-        </button>
-        <span className="text-xs text-gray-500">{isRec ? 'Recording active (global)' : 'Recorder idle'}</span>
+        </Button>
+        <span className="text-xs text-muted-foreground text-center">
+          {isRec ? 'Recording active' : 'Recorder idle'}
+        </span>
       </div>
     );
   };
+
+  const menuItems = [
+    {
+      title: 'Dashboard',
+      url: '/admin/dashboard',
+      icon: LayoutDashboard,
+    },
+  ];
+
+  const analyticsItems = [
+    {
+      title: 'Overview',
+      url: '/admin/analytics/overview',
+      icon: TrendingUp,
+    },
+    {
+      title: 'Session Recordings',
+      url: '/admin/analytics/recordings',
+      icon: Video,
+    },
+    {
+      title: 'Heatmaps',
+      url: '/admin/analytics/heatmap',
+      icon: Target,
+    },
+    {
+      title: 'Performance',
+      url: '/admin/analytics/performance',
+      icon: Zap,
+    },
+    {
+      title: 'Funnel Analysis',
+      url: '/admin/analytics/funnels',
+      icon: GitBranch,
+    },
+    {
+      title: 'Cohort Analysis',
+      url: '/admin/analytics/cohorts',
+      icon: Users,
+    },
+    {
+      title: 'A/B Testing',
+      url: '/admin/analytics/experiments',
+      icon: FlaskConical,
+    },
+    {
+      title: 'Events & Metrics',
+      url: '/admin/analytics',
+      icon: BarChart3,
+    },
+  ];
+
+  const managementItems = [
+    {
+      title: 'Products',
+      url: '/admin/products',
+      icon: Package,
+    },
+    {
+      title: 'Tracking Setup',
+      url: '/admin/tracking',
+      icon: Settings,
+    },
+  ];
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="w-full px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-4 gap-6">
-        <aside className="col-span-1 bg-white rounded-lg p-4 shadow">
-          <h3 className="font-semibold text-lg mb-4 text-gray-900">Admin Panel</h3>
-          <ul className="space-y-1 text-sm">
-            <li>
-              <Link to="/admin/dashboard" className="block p-3 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors font-medium">
-                📊 Dashboard
-              </Link>
-            </li>
-            <li className="pt-3 pb-2">
-              <p className="text-xs font-semibold text-gray-500 uppercase px-3">Analytics</p>
-            </li>
-            <li>
-              <Link to="/admin/analytics/overview" className="block p-3 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors">
-                📈 Overview
-              </Link>
-            </li>
-            <li>
-              <Link to="/admin/analytics/recordings" className="block p-3 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors">
-                🎬 Session Recordings
-              </Link>
-            </li>
-            <li>
-              <Link to="/admin/analytics/heatmap" className="block p-3 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors">
-                🎯 Heatmaps
-              </Link>
-            </li>
-            <li>
-              <Link to="/admin/analytics/performance" className="block p-3 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors">
-                ⚡ Performance
-              </Link>
-            </li>
-            <li>
-              <Link to="/admin/analytics/funnels" className="block p-3 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors">
-                🔄 Funnel Analysis
-              </Link>
-            </li>
-            <li>
-              <Link to="/admin/analytics/cohorts" className="block p-3 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors">
-                👥 Cohort Analysis
-              </Link>
-            </li>
-            <li>
-              <Link to="/admin/analytics/experiments" className="block p-3 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors">
-                🧪 A/B Testing
-              </Link>
-            </li>
-            <li>
-              <Link to="/admin/analytics" className="block p-3 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors">
-                📊 Events & Metrics
-              </Link>
-            </li>
-            <li className="pt-3 pb-2">
-              <p className="text-xs font-semibold text-gray-500 uppercase px-3">Management</p>
-            </li>
-            <li>
-              <Link to="/admin/products" className="block p-3 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors">
-                � Products
-              </Link>
-            </li>
-            <li>
-              <Link to="/admin/tracking" className="block p-3 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors">
-                🔗 Tracking Setup
-              </Link>
-            </li>
-            <li className="pt-4">
-              <div className="border-t pt-4">
-                <RecordingControl />
-              </div>
-            </li>
-          </ul>
-        </aside>
-        <main className="col-span-3">
+    <SidebarProvider>
+      <Sidebar collapsible="icon" variant="inset">
+        <SidebarHeader>
+          <div className="flex items-center gap-2 px-2 py-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white font-bold text-lg">
+              P
+            </div>
+            <div className="flex flex-col group-data-[collapsible=icon]:hidden">
+              <span className="font-semibold text-sm">PagePulse</span>
+              <span className="text-xs text-muted-foreground">Admin Panel</span>
+            </div>
+          </div>
+        </SidebarHeader>
+
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {menuItems.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={location.pathname === item.url}
+                      tooltip={item.title}
+                    >
+                      <Link to={item.url}>
+                        <item.icon className="w-4 h-4" />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+
+          <SidebarGroup>
+            <SidebarGroupLabel>Analytics</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {analyticsItems.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={location.pathname === item.url}
+                      tooltip={item.title}
+                    >
+                      <Link to={item.url}>
+                        <item.icon className="w-4 h-4" />
+                        <span>{item.title}</span>
+                        {location.pathname === item.url && (
+                          <ChevronRight className="ml-auto w-4 h-4" />
+                        )}
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+
+          <SidebarGroup>
+            <SidebarGroupLabel>Management</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {managementItems.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={location.pathname === item.url}
+                      tooltip={item.title}
+                    >
+                      <Link to={item.url}>
+                        <item.icon className="w-4 h-4" />
+                        <span>{item.title}</span>
+                        {location.pathname === item.url && (
+                          <ChevronRight className="ml-auto w-4 h-4" />
+                        )}
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
+
+        <SidebarFooter>
+          <div className="p-2">
+            <Separator className="mb-2" />
+            <RecordingControl />
+          </div>
+        </SidebarFooter>
+      </Sidebar>
+
+      <SidebarInset>
+        <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-2 border-b bg-background px-4 shadow-sm">
+          <SidebarTrigger />
+          <Separator orientation="vertical" className="h-6" />
+          <div className="flex items-center justify-between flex-1 gap-2">
+            <span className="font-semibold text-lg truncate">
+              {analyticsItems.find((item) => item.url === location.pathname)?.title ||
+                managementItems.find((item) => item.url === location.pathname)?.title ||
+                menuItems.find((item) => item.url === location.pathname)?.title ||
+                'Admin'}
+            </span>
+          </div>
+        </header>
+
+        <main className="flex-1 overflow-auto p-4 md:p-6">
           <Outlet />
         </main>
-      </div>
-    </div>
+      </SidebarInset>
+    </SidebarProvider>
   );
 };
 
