@@ -277,6 +277,39 @@ If you want, I can add any of the above (auth, Docker, tests) in this repo.
 
 ---
 
-## 📄 License
+## � Deployment (Vercel + Render)
+
+Frontend on Vercel (Vite + React):
+- Build ignores TypeScript errors now (build = `vite build`). For strict checking locally, run `npm run typecheck`.
+- Set an Environment Variable on Vercel: `VITE_API_BASE=https://<your-render-service>.onrender.com`
+- Re-run build/deploy after setting env vars.
+
+Backend on Render (Express):
+- Use the `brained/server` as the project root.
+- Start command: `npm start` (already configured). Render provides `PORT` env var; the server uses it.
+- Required env vars:
+  - `MONGO_URI` — your MongoDB connection string
+  - `CLIENT_URLS` — comma-separated list of allowed origins (e.g., `https://<your-vercel-app>.vercel.app,https://<custom-domain>`)
+  - Optional: `JWT_SECRET`, `PORT` (Render sets PORT automatically)
+- Health check: `GET /api/health` → `{"status":"Server running"}`
+
+CORS and multiple URLs:
+- The server reads `CLIENT_URLS` (comma separated) and applies it to both HTTP CORS and Socket.IO CORS.
+- After your frontend is live on Vercel, copy the origin (e.g., `https://my-app.vercel.app`) into Render’s `CLIENT_URLS`.
+- On the frontend, set `VITE_API_BASE` to the Render URL (e.g., `https://my-api.onrender.com`).
+
+Post-deploy validation checklist:
+- Backend: `GET https://<render>/api/health` returns 200
+- Backend: try `GET https://<render>/api/analytics/events/summary` (after seeding locally or posting events)
+- Frontend: app loads on Vercel, API requests go to `VITE_API_BASE`
+- Browser console: no CORS errors; if you see CORS blocked, ensure the exact Vercel origin is present in `CLIENT_URLS`.
+
+Notes:
+- If you use a custom domain on Vercel, add that domain to `CLIENT_URLS` too.
+- For local testing while prod is live, you can keep `CLIENT_URLS=http://localhost:5173,https://<vercel-domain>`.
+
+---
+
+## �📄 License
 
 MIT

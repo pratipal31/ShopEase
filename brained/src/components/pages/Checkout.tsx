@@ -5,8 +5,8 @@ import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
 
-// keep API env consistent across the app (uses VITE_API_URL elsewhere)
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+// Resolve API base from env: prefer VITE_API_BASE (docs/production), then VITE_API_URL (legacy), then localhost
+const API_BASE = (import.meta as any).env?.VITE_API_BASE || (import.meta as any).env?.VITE_API_URL || 'http://localhost:5000';
 
 export default function Checkout() {
   const navigate = useNavigate();

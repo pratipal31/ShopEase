@@ -5,7 +5,7 @@ const TrackingSetup: React.FC = () => {
   const [copied, setCopied] = useState(false);
   const [projectId, setProjectId] = useState('default');
 
-  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+  const apiUrl = (import.meta as any).env?.VITE_API_BASE || (import.meta as any).env?.VITE_API_URL || 'http://localhost:5000';
   
   const trackingCode = `<!-- PagePulse Analytics -->
 <script src="${apiUrl}/pagepulse.js" data-project-id="${projectId}"></script>
