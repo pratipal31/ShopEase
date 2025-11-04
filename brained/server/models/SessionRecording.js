@@ -33,9 +33,12 @@ const sessionRecordingSchema = new mongoose.Schema({
   
   // Device info
   device: {
-    type: String,
+    type: {
+      type: String, // mobile, desktop, tablet
+    },
     browser: String,
     os: String,
+    screen: String,
     screenResolution: String,
     viewport: String,
   },
